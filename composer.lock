@@ -1,0 +1,59 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "fe156e2469b18bdc2bddecf309edee56",
+    "content-hash": "ecdd5e469f944490df83982694b6dcd0",
+    "packages": [
+        {
+            "name": "ashrafi/php-connectors",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ashrafimanesh/phpConnectors.git",
+                "reference": "ff00eb6985eba59cbb3f2bb65022f5cdf3bc5363"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ashrafimanesh/phpConnectors/zipball/ff00eb6985eba59cbb3f2bb65022f5cdf3bc5363",
+                "reference": "ff00eb6985eba59cbb3f2bb65022f5cdf3bc5363",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ashrafi\\PhpConnectors\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ramin",
+                    "email": "ashrafimanesh@gmail.com"
+                }
+            ],
+            "description": "php curl soap connectors",
+            "time": "2017-03-23 19:33:44"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "ashrafi/php-connectors": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.5.9"
+    },
+    "platform-dev": []
+}

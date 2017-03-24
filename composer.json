@@ -1,0 +1,21 @@
+{
+    "name": "ashrafi/php-payment-gateways",
+    "description": "php payment gateways",
+    "authors": [
+        {
+            "name": "ramin",
+            "email": "ashrafimanesh@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "ashrafi/php-connectors": "dev-master"
+    },
+    "license": "MIT",
+    "minimum-stability": "dev"
+    ,"autoload": {
+        "psr-4": {
+            "Ashrafi\\PaymentGateways\\": "src/"
+        }
+    }
+}
