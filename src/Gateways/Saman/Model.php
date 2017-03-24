@@ -33,6 +33,7 @@ class Model extends \Ashrafi\PaymentGateways\Model
         $payResponse=new Response($payRequest);
         try{
             $token=$this->_token($payRequest->getAmount(),$payRequest->getOrderId());
+            $payResponse->setGatewayResponses($token);
             if(strlen($token)>10)
             {
                 $payResponse->setGatewayOrderId($token);
