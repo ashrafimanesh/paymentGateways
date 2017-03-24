@@ -21,7 +21,7 @@ use Ashrafi\PhpConnectors\SoapConnector;
 
 class Model extends \Ashrafi\PaymentGateways\Model
 {
-    private $MID = '10560528', $terminalId = '670831', $userPassword = '50437', $orderId;
+    private $MID = '10560528';
 
     /**
      * call pay webservice
