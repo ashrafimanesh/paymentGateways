@@ -113,7 +113,7 @@ class Response
      * @param mixed $request
      * @return Response
      */
-    public function setRequest(Request $request=null)
+    public function setRequest(Request $request)
     {
         $this->request = $request;
         return $this;
@@ -138,5 +138,14 @@ class Response
         return $this->gatewayResponses;
     }
 
+
+    public static function copy(Response $response){
+        $class=get_called_class();
+        $instance=new $class($response->getRequest());
+        foreach($response as $key=>$value){
+            $instance->$key=$value;
+        }
+        return $instance;
+    }
 
 }
