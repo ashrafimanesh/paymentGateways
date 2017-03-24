@@ -4,12 +4,12 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "fe156e2469b18bdc2bddecf309edee56",
-    "content-hash": "ecdd5e469f944490df83982694b6dcd0",
+    "hash": "554ed80662fafd097f60aed391aa7e09",
+    "content-hash": "2bc08de93c2cc14fecbea7efc2096565",
     "packages": [
         {
             "name": "ashrafi/php-connectors",
-            "version": "dev-master",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ashrafimanesh/phpConnectors.git",
@@ -47,9 +47,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "ashrafi/php-connectors": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

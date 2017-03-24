@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=5.5.9",
-        "ashrafi/php-connectors": "dev-master"
+        "ashrafi/php-connectors": "^1.0"
     },
     "license": "MIT",
     "minimum-stability": "dev"
