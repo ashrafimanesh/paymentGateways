@@ -16,7 +16,8 @@ trait Collection
 
     public function save(){
         $this->created_at=time();
-        $function=end(explode('\\',get_class($this)));
+        $ex=explode('\\',get_class($this));
+        $function=end($ex);
         $logPath = self::getLogPath($this->getOrderId());
         file_put_contents($logPath.'/'.$function.'.log',json_encode($this->toArray(),JSON_UNESCAPED_UNICODE).PHP_EOL, LOCK_EX);
         $this->log=['path'=>$logPath,'file'=>$function.'.log'];
@@ -37,7 +38,8 @@ trait Collection
 
     public static function getSavedResponse(Request $request,$class=null){
         $logPath=self::getLogPath($request->getOrderId());
-        $function=end(explode('\\',$class));
+        $ex=explode('\\',$class);
+        $function=end($ex);
         if(!file_exists($logPath.'/'.$function.'.log')){
             return null;
         }
