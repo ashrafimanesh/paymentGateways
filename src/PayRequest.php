@@ -14,10 +14,16 @@ class PayRequest extends Request
 
     protected $amount,$callbackUrl,$userCallbackUrl,$inputs = array();
 
-    public function __construct($amount,$callbackUrl,$orderId=0,$inputs=[]){
+    /**
+     * @param int $amount
+     * @param null $customerCallbackUrl
+     * @param int $orderId
+     * @param array $inputs
+     */
+    public function __construct($amount,$customerCallbackUrl='',$orderId=0,$inputs=[]){
         parent::__construct($orderId);
         $config=require(__DIR__.'/config/app.php');
-        $this->setAmount($amount)->setCallbackUrl($config['systemCallbackUrl'])->setUserCallbackUrl($callbackUrl)
+        $this->setAmount($amount)->setUserCallbackUrl($customerCallbackUrl)
             ->setInputs($inputs);
     }
 

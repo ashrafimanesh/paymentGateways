@@ -25,6 +25,7 @@ class Response
     public $gatewayResponses,$html;
 
     /**
+     * @param Request $request
      * @param bool|false $status
      * @param string $message
      * @param int $code

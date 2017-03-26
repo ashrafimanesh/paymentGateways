@@ -89,6 +89,9 @@ class Model extends \Ashrafi\PaymentGateways\Model
         if($result>0){
             $confirmResponse->setStatus(true)->setAmount($result);
         }
+        else{
+            $confirmResponse->setMessage($result)->setStatus(false);
+        }
         return $confirmResponse;
     }
 

@@ -7,13 +7,12 @@
  */
 
 return [
-    'systemCallbackUrl'=>(str_replace(trim(end(explode('/',(isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"))),'callback.php',(isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"))
-    ,'logPath'=>__DIR__.'/../logs'
-    ,'logDateFormat'=>'Y-m-d'
+    'logPath'=>function_exists('env') ? env('payment_gateway_logPath',__DIR__.'/../logs') : __DIR__.'/../logs'
+    ,'logDateFormat'=>function_exists('env') ? env('payment_gateway_logDateFormat','Y-m-d') : 'Y-m-d'
     ,'proxy'=>[
-        'enable'=>true,
-        'type'=>'urlProxy',//'proxy|urlProxy'
-        'curlProxyAddress'=>'http://ashrafimanesh.ir/proxy/curl.php',//http://proxy url
-        'soapProxyAddress'=>'http://ashrafimanesh.ir/proxy/soap.php',//http://proxy url
+        'enable'=>function_exists('env') ? env('payment_gateway_proxy_enable',true) : true,
+        'type'=>function_exists('env') ? env('payment_gateway_proxy_type','urlProxy') : 'urlProxy',//'proxy|urlProxy'
+        'curlProxyAddress'=>function_exists('env') ? env('payment_gateway_proxy_curlProxyAddress','http://ashrafimanesh.ir/proxy/curl.php') : 'http://ashrafimanesh.ir/proxy/curl.php',//http://proxy url
+        'soapProxyAddress'=>function_exists('env') ? env('payment_gateway_proxy_soapProxyAddress','http://ashrafimanesh.ir/proxy/soap.php') :  'http://ashrafimanesh.ir/proxy/soap.php',//http://proxy url
     ]
 ];
