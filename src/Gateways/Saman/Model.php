@@ -17,6 +17,7 @@ use Ashrafi\PaymentGateways\iModel;
 use Ashrafi\PaymentGateways\PayRequest;
 use Ashrafi\PaymentGateways\Request;
 use Ashrafi\PaymentGateways\Response;
+use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\SoapConnector;
 
 class Model extends \Ashrafi\PaymentGateways\Model
@@ -74,7 +75,13 @@ class Model extends \Ashrafi\PaymentGateways\Model
     {
         $result=null;
         if($confirmRequest->getGatewayOrderId()) {
-            $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL');
+            $config=require __DIR__.'/../../config/app.php';
+            if($config['proxy']['enable'] && $config['proxy']['soapProxyAddress']){
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL',$config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
+            }
+            else {
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL');
+            }
             $result = $client->run('verifyTransaction',[$confirmRequest->getGatewayOrderId(), $this->MID]);
         }
         $confirmResponse=new ConfirmResponse($confirmRequest);
@@ -114,7 +121,13 @@ class Model extends \Ashrafi\PaymentGateways\Model
                 'TotalAmount' => ($amount),
                 'ResNum' => $orderId,
             ];
-            $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL');
+            $config=require __DIR__.'/../../config/app.php';
+            if($config['proxy']['enable'] && $config['proxy']['soapProxyAddress']){
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL',$config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
+            }
+            else{
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL');
+            }
             $i = 0;
             while ($i < 2) {
                 $i++;

@@ -57,7 +57,7 @@ abstract class Model implements iModel
         $this->calledClass=get_called_class();
 
         $finalStatus=$callbackRequest->getFinalStatus();
-        if($finalStatus!=Response::SuccessPayResponse){
+        if(!in_array($finalStatus,[Response::SuccessPayResponse])){
 
             //get last response
             $finalResponse = $this->_getFinalPayResponse($callbackRequest);
@@ -88,7 +88,7 @@ abstract class Model implements iModel
     {
         $this->calledClass=get_called_class();
         $finalStatus=$confirmRequest->getFinalStatus();
-        if($finalStatus!=Response::SuccessPaid){
+        if(!in_array($finalStatus,[Response::FailedConfirm,Response::SuccessPaid])){
             //get last response
             $finalResponse = $this->_getFinalConfirmResponse($confirmRequest);
             if(!$finalResponse){

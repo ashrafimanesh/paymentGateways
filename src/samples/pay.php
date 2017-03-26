@@ -11,4 +11,5 @@ $orderId="a".uniqid();
 
 $model=new \Ashrafi\PaymentGateways\Gateways\Saman\Model();
 $payRequest=new \Ashrafi\PaymentGateways\PayRequest($amount,$callbackUrl,$orderId);
+echo '<pre>';
 var_dump($model->pay($payRequest));
