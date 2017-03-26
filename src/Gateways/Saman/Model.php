@@ -63,7 +63,7 @@ class Model extends \Ashrafi\PaymentGateways\Model
                 break;
             case $inputs['StateCode']=="0" && $inputs['RefNum'] && $inputs['SecurePan']:
             case $inputs['StateCode']==0 && $inputs['RefNum'] && $inputs['SecurePan']:
-                $callbackResponse->setStatusCode(CallbackResponse::Success)->setCardNumber($inputs['SecurePan'])->setStatus(true);
+                $callbackResponse->setStatusCode(CallbackResponse::Success)->setCardNumber($inputs['SecurePan'])->setStatus(true)->setGatewayOrderId($inputs['RefNum']);
                 break;
 
         }
