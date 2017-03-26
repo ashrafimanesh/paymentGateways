@@ -21,7 +21,8 @@ class Response
     const SuccessConfirm='SuccessConfirm';
     const FailedConfirm='FailedConfirm';
 
-    protected $request,$code,$message,$status,$gatewayResponses,$html;
+    protected $request,$code,$message,$status;
+    public $gatewayResponses,$html;
 
     /**
      * @param bool|false $status
