@@ -13,16 +13,23 @@ use Ashrafi\PaymentGateways\CallbackRequest;
 use Ashrafi\PaymentGateways\CallbackResponse;
 use Ashrafi\PaymentGateways\ConfirmRequest;
 use Ashrafi\PaymentGateways\ConfirmResponse;
-use Ashrafi\PaymentGateways\iModel;
+use Ashrafi\PaymentGateways\Model as PaymentGatewayModel;
 use Ashrafi\PaymentGateways\PayRequest;
-use Ashrafi\PaymentGateways\Request;
 use Ashrafi\PaymentGateways\Response;
 use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\SoapConnector;
 
-class Model extends \Ashrafi\PaymentGateways\Model
+class Model extends PaymentGatewayModel
 {
-    private $MID = '10560528';
+    private $MID = '';
+
+    public function __construct(){
+        parent::__construct();
+        $this->MID=$this->config['gateways']['saman']['MID'];
+        if(!$this->MID){
+            throw new \Exception('Please set saman MID in config. Read config/app.php for more detail');
+        }
+    }
 
     /**
      * call pay webservice
@@ -33,6 +40,7 @@ class Model extends \Ashrafi\PaymentGateways\Model
     {
         $payResponse=new Response($payRequest);
         try{
+            //get token from saman bank
             $token=$this->_token($payRequest->getAmount(),$payRequest->getOrderId());
             $payResponse->setGatewayResponses($token);
             if(strlen($token)>10)
@@ -52,6 +60,10 @@ class Model extends \Ashrafi\PaymentGateways\Model
         return $payResponse;
     }
 
+    /**
+     * @param CallbackRequest $callbackRequest
+     * @return CallbackResponse
+     */
     protected function _callback(CallbackRequest $callbackRequest)
     {
         $inputs=$callbackRequest->getGatewayResponses();
@@ -71,13 +83,16 @@ class Model extends \Ashrafi\PaymentGateways\Model
     }
 
 
+    /**
+     * @param ConfirmRequest $confirmRequest
+     * @return ConfirmResponse
+     */
     protected function _confirm(ConfirmRequest $confirmRequest)
     {
         $result=null;
         if($confirmRequest->getGatewayOrderId()) {
-            $config=require __DIR__.'/../../config/app.php';
-            if($config['proxy']['enable'] && $config['proxy']['soapProxyAddress']){
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL',$config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
+            if($this->config['proxy']['enable'] && $this->config['proxy']['soapProxyAddress']){
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL',$this->config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
             }
             else {
                 $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL');
@@ -124,9 +139,8 @@ class Model extends \Ashrafi\PaymentGateways\Model
                 'TotalAmount' => ($amount),
                 'ResNum' => $orderId,
             ];
-            $config=require __DIR__.'/../../config/app.php';
-            if($config['proxy']['enable'] && $config['proxy']['soapProxyAddress']){
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL',$config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
+            if($this->config['proxy']['enable'] && $this->config['proxy']['soapProxyAddress']){
+                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL',$this->config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
             }
             else{
                 $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL');

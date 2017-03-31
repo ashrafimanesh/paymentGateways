@@ -11,7 +11,12 @@ namespace Ashrafi\PaymentGateways;
 
 abstract class Model implements iModel
 {
-    protected $calledClass;
+    protected $calledClass,$config;
+
+    public function __construct(){
+        $config=require __DIR__.'/config/app.php';
+        $this->config=$config;
+    }
 
     /**
      * @param PayRequest $payRequest

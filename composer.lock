@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "ashrafi/php-connectors",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ashrafimanesh/phpConnectors.git",
-                "reference": "14ccf16655d1c8b04ffdcb3ace12cd8be1c0e22a"
+                "reference": "be53b61b77b18e9ee9b38e2fe0949054fc8850d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ashrafimanesh/phpConnectors/zipball/14ccf16655d1c8b04ffdcb3ace12cd8be1c0e22a",
-                "reference": "14ccf16655d1c8b04ffdcb3ace12cd8be1c0e22a",
+                "url": "https://api.github.com/repos/ashrafimanesh/phpConnectors/zipball/be53b61b77b18e9ee9b38e2fe0949054fc8850d4",
+                "reference": "be53b61b77b18e9ee9b38e2fe0949054fc8850d4",
                 "shasum": ""
             },
             "require": {
@@ -41,7 +41,7 @@
                 }
             ],
             "description": "php curl soap connectors",
-            "time": "2017-03-26 07:06:17"
+            "time": "2017-03-31 08:37:47"
         }
     ],
     "packages-dev": [],
