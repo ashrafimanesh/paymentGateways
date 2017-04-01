@@ -10,7 +10,7 @@ $orderId="a".uniqid();
 
 
 $model=new \Ashrafi\PaymentGateways\Gateways\Saman\Model();
-$payRequest=new \Ashrafi\PaymentGateways\PayRequest($amount,$callbackUrl,$orderId);
+$payRequest=new \Ashrafi\PaymentGateways\Requests\PayRequest($amount,$callbackUrl,$orderId);
 $payRequest->setCallbackUrl((str_replace(trim(end(explode('/',(isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"))),'callback.php',(isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]")));
 echo '<pre>';
 var_dump($model->pay($payRequest));

@@ -6,7 +6,7 @@
  * Time: 3:30 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Requests;
 
 
 class CallbackRequest extends Request

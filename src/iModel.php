@@ -1,6 +1,10 @@
 <?php
 
 namespace Ashrafi\PaymentGateways;
+use Ashrafi\PaymentGateways\Requests\BalanceRequest;
+use Ashrafi\PaymentGateways\Requests\CallbackRequest;
+use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
+use Ashrafi\PaymentGateways\Requests\PayRequest;
 
 /**
  *
@@ -11,19 +15,28 @@ interface iModel {
     /**
      * call pay webservice
      * @param PayRequest $payRequest
-     * @return Response
+     * @return Responses\Response
      */
     function pay(PayRequest $payRequest);
 
 
     /**
      * @param CallbackRequest $callbackRequest
-     * @return CallbackResponse
+     * @return Responses\CallbackResponse
      */
     function callback(CallbackRequest $callbackRequest);
     
     /**
      * call confirm webservice
+     * @param ConfirmRequest $confirmRequest
+     * @return Responses\ConfirmResponse
      */
     function confirm(ConfirmRequest $confirmRequest);
+
+
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @return Responses\BalanceResponse
+     */
+    function getBalance(BalanceRequest $balanceRequest);
 }

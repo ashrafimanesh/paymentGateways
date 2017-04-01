@@ -6,8 +6,10 @@
  * Time: 9:30 AM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Responses;
 
+
+use Ashrafi\PaymentGateways\Requests\Request;
 
 class CallbackResponse extends Response
 {

@@ -9,13 +9,15 @@
 namespace Ashrafi\PaymentGateways\Gateways\Saman;
 
 
-use Ashrafi\PaymentGateways\CallbackRequest;
-use Ashrafi\PaymentGateways\CallbackResponse;
-use Ashrafi\PaymentGateways\ConfirmRequest;
-use Ashrafi\PaymentGateways\ConfirmResponse;
+use Ashrafi\PaymentGateways\Requests\BalanceRequest;
+use Ashrafi\PaymentGateways\Responses\BalanceResponse;
+use Ashrafi\PaymentGateways\Requests\CallbackRequest;
+use Ashrafi\PaymentGateways\Responses\CallbackResponse;
+use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
+use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
 use Ashrafi\PaymentGateways\Model as PaymentGatewayModel;
-use Ashrafi\PaymentGateways\PayRequest;
-use Ashrafi\PaymentGateways\Response;
+use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Responses\Response;
 use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\SoapConnector;
 
@@ -109,6 +111,18 @@ class Model extends PaymentGatewayModel
         }
         return $confirmResponse;
     }
+
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @return BalanceResponse
+     */
+    protected function _getBalance(BalanceRequest $balanceRequest)
+    {
+        $balanceResponse=new BalanceResponse($balanceRequest->getUsername());
+        $balanceResponse->setStatus(false)->setMessage('Method does not exist in saman gateway');
+        return $balanceResponse;
+    }
+
 
     public function getServerAddress()
     {

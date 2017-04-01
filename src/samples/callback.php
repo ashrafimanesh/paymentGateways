@@ -10,7 +10,7 @@ require_once __DIR__.'/loader.php';
 
 $model=new \Ashrafi\PaymentGateways\Gateways\Saman\Model();
 $inputs=$_GET+$_POST;
-$callbackRequest=new \Ashrafi\PaymentGateways\CallbackRequest($inputs['ResNum'],$inputs['RefNum'],$inputs);
+$callbackRequest=new \Ashrafi\PaymentGateways\Requests\CallbackRequest($inputs['ResNum'],$inputs['RefNum'],$inputs);
 $callbackResponse=$model->callback($callbackRequest);
 echo '<pre>';
 var_dump($callbackResponse->toArray());

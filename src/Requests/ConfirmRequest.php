@@ -6,7 +6,7 @@
  * Time: 1:13 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Requests;
 
 
 class ConfirmRequest extends Request

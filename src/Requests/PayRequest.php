@@ -6,7 +6,7 @@
  * Time: 11:43 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Requests;
 
 
 class PayRequest extends Request
@@ -22,7 +22,6 @@ class PayRequest extends Request
      */
     public function __construct($amount,$customerCallbackUrl='',$orderId=0,$inputs=[]){
         parent::__construct($orderId);
-        $config=require(__DIR__.'/config/app.php');
         $this->setAmount($amount)->setUserCallbackUrl($customerCallbackUrl)
             ->setInputs($inputs);
     }

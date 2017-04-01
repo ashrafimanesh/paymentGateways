@@ -6,7 +6,7 @@
  * Time: 2:02 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Responses;
 
 
 class ConfirmResponse extends Response

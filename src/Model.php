@@ -9,6 +9,14 @@
 namespace Ashrafi\PaymentGateways;
 
 
+use Ashrafi\PaymentGateways\Requests\BalanceRequest;
+use Ashrafi\PaymentGateways\Requests\CallbackRequest;
+use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
+use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Responses\CallbackResponse;
+use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
+use Ashrafi\PaymentGateways\Responses\Response;
+
 abstract class Model implements iModel
 {
     protected $calledClass,$config;
@@ -20,21 +28,27 @@ abstract class Model implements iModel
 
     /**
      * @param PayRequest $payRequest
-     * @return Response
+     * @return Responses\Response
      */
     abstract protected function _pay(PayRequest $payRequest);
 
     /**
      * @param CallbackRequest $callbackRequest
-     * @return CallbackResponse
+     * @return Responses\CallbackResponse
      */
     abstract protected function _callback(CallbackRequest $callbackRequest);
 
     /**
      * @param ConfirmRequest $confirmRequest
-     * @return ConfirmResponse
+     * @return Responses\ConfirmResponse
      */
     abstract protected function _confirm(ConfirmRequest $confirmRequest);
+
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @return Responses\BalanceResponse
+     */
+    abstract protected function _getBalance(BalanceRequest $balanceRequest);
 
     function pay(PayRequest $payRequest)
     {
@@ -117,6 +131,13 @@ abstract class Model implements iModel
         }
         return $confirmResponse;
     }
+
+    function getBalance(BalanceRequest $balanceRequest)
+    {
+        $this->calledClass=get_called_class();
+
+    }
+
 
     /**
      * @param Request $request

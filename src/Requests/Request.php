@@ -6,8 +6,10 @@
  * Time: 1:36 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Requests;
 
+
+use Ashrafi\PaymentGateways\Collection;
 
 class Request
 {

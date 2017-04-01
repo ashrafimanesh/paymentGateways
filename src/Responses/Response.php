@@ -6,10 +6,13 @@
  * Time: 11:43 PM
  */
 
-namespace Ashrafi\PaymentGateways;
+namespace Ashrafi\PaymentGateways\Responses;
 
 
-class Response
+use Ashrafi\PaymentGateways\Collection;
+use Ashrafi\PaymentGateways\Requests\Request;
+
+class Response extends AtomResponse
 {
     use Collection;
 
@@ -21,7 +24,7 @@ class Response
     const SuccessConfirm='SuccessConfirm';
     const FailedConfirm='FailedConfirm';
 
-    protected $request,$code,$message,$status;
+    protected $request,$code;
     public $gatewayResponses,$html;
 
     /**
@@ -31,7 +34,7 @@ class Response
      * @param int $code
      */
     public function __construct(Request $request=null,$status=false,$message='',$code=1){
-        $this->setRequest($request)->setStatus($status)->setCode($code)->setMessage($message)->setOrderId($request->getOrderId())->setGatewayOrderId($request->getGatewayOrderId());
+        $this->setRequest($request)->setCode($code)->setStatus($status)->setMessage($message)->setOrderId($request->getOrderId())->setGatewayOrderId($request->getGatewayOrderId());
     }
 
     /**
@@ -43,45 +46,12 @@ class Response
     }
 
     /**
-     * @param mixed $code
+     * @param $code
+     * @return Response
      */
     public function setCode($code)
     {
         $this->code = $code;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
-    /**
-     * @param mixed $message
-     */
-    public function setMessage($message)
-    {
-        $this->message = $message;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param mixed $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
         return $this;
     }
 
@@ -113,7 +83,7 @@ class Response
 
     /**
      * @param mixed $request
-     * @return Response
+     * @return $this
      */
     public function setRequest(Request $request)
     {
@@ -123,8 +93,8 @@ class Response
 
 
     /**
-     * @param mixed $gatewayResponses
-     * @return CallbackResponse
+     * @param $gatewayResponses
+     * @return Response
      */
     public function setGatewayResponses($gatewayResponses)
     {

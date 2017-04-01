@@ -8,8 +8,8 @@
 
 require_once __DIR__.'/loader.php';
 $orderId=$_GET['orderId'];
-$gatewayOrderId='7joGYrw9Qrm5lnMBqn/7If7QUMkm4m';
-$confirmRequest=new \Ashrafi\PaymentGateways\ConfirmRequest($orderId,$gatewayOrderId);
+$gatewayOrderId='HtuuD6rIhRr+AD5c8wDe5teDVDk0Pd';
+$confirmRequest=new \Ashrafi\PaymentGateways\Requests\ConfirmRequest($orderId,$gatewayOrderId);
 
 $model=new \Ashrafi\PaymentGateways\Gateways\Saman\Model();
 echo '<pre>';
