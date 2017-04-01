@@ -13,9 +13,14 @@ use Ashrafi\PaymentGateways\Requests\BalanceRequest;
 use Ashrafi\PaymentGateways\Requests\CallbackRequest;
 use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Requests\TransferRequest;
+use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PaymentGateways\Responses\CallbackResponse;
 use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
 use Ashrafi\PaymentGateways\Responses\Response;
+use Ashrafi\PhpConnectors\AbstractConnectors;
+use Ashrafi\PhpConnectors\CurlConnector;
+use Ashrafi\PhpConnectors\SoapConnector;
 
 abstract class Model implements iModel
 {
@@ -49,6 +54,12 @@ abstract class Model implements iModel
      * @return Responses\BalanceResponse
      */
     abstract protected function _getBalance(BalanceRequest $balanceRequest);
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @return TransferResponse
+     */
+    abstract protected function _transfer(TransferRequest $transferRequest);
 
     function pay(PayRequest $payRequest)
     {
@@ -132,10 +143,30 @@ abstract class Model implements iModel
         return $confirmResponse;
     }
 
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @return Responses\BalanceResponse
+     */
     function getBalance(BalanceRequest $balanceRequest)
     {
         $this->calledClass=get_called_class();
 
+        $balanceResponse=$this->_getBalance($balanceRequest);
+
+        return $balanceResponse;
+    }
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @return TransferResponse
+     */
+    function transfer(TransferRequest $transferRequest){
+
+        $this->calledClass=get_called_class();
+
+        $transferResponse=$this->_transfer($transferRequest);
+
+        return $transferResponse;
     }
 
 
@@ -167,5 +198,29 @@ abstract class Model implements iModel
         return $finalResponse;
     }
 
+
+    /**
+     * @param $url
+     * @return AbstractConnectors
+     */
+    protected function _getConnector($url, $class=SoapConnector::class,$type=AbstractConnectors::ProxyTypeUrl)
+    {
+        switch($class){
+            case CurlConnector::class:
+                $proxyAddressIndex='curlProxyAddress';
+                break;
+            case SoapConnector::class:
+            default:
+                $proxyAddressIndex='soapProxyAddress';
+                break;
+
+        }
+        if ($this->config['proxy']['enable'] && $this->config['proxy'][$proxyAddressIndex]) {
+            $client = $class::getInstance($url, $this->config['proxy'][$proxyAddressIndex], null, $type);
+        } else {
+            $client = $class::getInstance($url);
+        }
+        return $client;
+    }
 
 }

@@ -30,8 +30,9 @@ class CallbackResponse extends Response
     }
 
     /**
-     * @param mixed $statusCode
-     * @return CallbackResponse
+     * @param $statusCode
+     * @return $this
+     * @throws \Exception
      */
     public function setStatusCode($statusCode)
     {
@@ -51,8 +52,8 @@ class CallbackResponse extends Response
     }
 
     /**
-     * @param mixed $cardNumber
-     * @return CallbackResponse
+     * @param $cardNumber
+     * @return $this
      */
     public function setCardNumber($cardNumber)
     {
@@ -60,6 +61,9 @@ class CallbackResponse extends Response
         return $this;
     }
 
+    /**
+     * @return array
+     */
     private function _allStatusCodes()
     {
         return [self::CancelByUser,self::Success,self::Unknown];

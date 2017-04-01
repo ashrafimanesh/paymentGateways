@@ -10,6 +10,7 @@ namespace Ashrafi\PaymentGateways\Gateways\Saman;
 
 
 use Ashrafi\PaymentGateways\Requests\BalanceRequest;
+use Ashrafi\PaymentGateways\Requests\TransferRequest;
 use Ashrafi\PaymentGateways\Responses\BalanceResponse;
 use Ashrafi\PaymentGateways\Requests\CallbackRequest;
 use Ashrafi\PaymentGateways\Responses\CallbackResponse;
@@ -18,7 +19,9 @@ use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
 use Ashrafi\PaymentGateways\Model as PaymentGatewayModel;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
 use Ashrafi\PaymentGateways\Responses\Response;
+use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PhpConnectors\AbstractConnectors;
+use Ashrafi\PhpConnectors\CurlConnector;
 use Ashrafi\PhpConnectors\SoapConnector;
 
 class Model extends PaymentGatewayModel
@@ -93,12 +96,8 @@ class Model extends PaymentGatewayModel
     {
         $result=null;
         if($confirmRequest->getGatewayOrderId()) {
-            if($this->config['proxy']['enable'] && $this->config['proxy']['soapProxyAddress']){
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL',$this->config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
-            }
-            else {
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL');
-            }
+            $url='https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL';
+            $client=$this->_getConnector($url);
             $result = $client->run('verifyTransaction',[$confirmRequest->getGatewayOrderId(), $this->MID]);
         }
         $confirmResponse=new ConfirmResponse($confirmRequest);
@@ -119,8 +118,18 @@ class Model extends PaymentGatewayModel
     protected function _getBalance(BalanceRequest $balanceRequest)
     {
         $balanceResponse=new BalanceResponse($balanceRequest->getUsername());
-        $balanceResponse->setStatus(false)->setMessage('Method does not exist in saman gateway');
+        $balanceResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in saman gateway');
         return $balanceResponse;
+    }
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @return TransferResponse
+     */
+    protected function _transfer(TransferRequest $transferRequest)
+    {
+        $transferResponse=new TransferResponse($transferRequest,false,'Method '.__FUNCTION__.' does not exist in saman gateway');
+        return $transferResponse;
     }
 
 
@@ -153,12 +162,8 @@ class Model extends PaymentGatewayModel
                 'TotalAmount' => ($amount),
                 'ResNum' => $orderId,
             ];
-            if($this->config['proxy']['enable'] && $this->config['proxy']['soapProxyAddress']){
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL',$this->config['proxy']['soapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
-            }
-            else{
-                $client = SoapConnector::getInstance('https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL');
-            }
+            $url='https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL';
+            $client = $this->_getConnector($url);
             $i = 0;
             while ($i < 2) {
                 $i++;

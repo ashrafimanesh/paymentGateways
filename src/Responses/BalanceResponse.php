@@ -11,8 +11,10 @@ namespace Ashrafi\PaymentGateways\Responses;
 
 use Ashrafi\PaymentGateways\AccountBalance;
 
-class BalanceResponse extends AtomResponse
+class BalanceResponse
 {
+    use AtomResponse;
+
     protected $username,$accountsId=[];
 
     /**
@@ -59,8 +61,8 @@ class BalanceResponse extends AtomResponse
     }
 
     /**
-     * @param mixed $username
-     * @return BalanceResponse
+     * @param $username
+     * @return $this
      */
     protected function setUsername($username)
     {

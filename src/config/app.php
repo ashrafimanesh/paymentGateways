@@ -23,6 +23,9 @@ return [
             'userPassword' => function_exists('env') ? env('payment_gateway_mellat_password') : ''
         ],
         'saman'=>['MID'=>function_exists('env') ? env('payment_gateway_saman_mid') : null],
-        'perfectMoney'=>[]
+        'perfectMoney'=>[
+            'accountId'=>function_exists('env') ? env('payment_gateway_perfectMoney_accountId') : '',
+            'passPhrase'=>function_exists('env') ? env('payment_gateway_perfectMoney_passPhrase') : ''
+        ],
     ]
 ];

@@ -22,7 +22,8 @@ class ConfirmResponse extends Response
     }
 
     /**
-     * @param mixed $amount
+     * @param $amount
+     * @return $this
      */
     public function setAmount($amount)
     {

@@ -9,30 +9,16 @@
 namespace Ashrafi\PaymentGateways\Requests;
 
 
+use Ashrafi\PaymentGateways\AccountTrait;
+
 class BalanceRequest
 {
-    protected $accountId,$username,$password,$currency=null;
+    use AccountTrait;
 
-    public function __construct($username,$password,$accountId=null,$currency=null){
-        $this->setUsername($username)->setPassword($password)->setAccountId($accountId)->setCurrency($currency);
-    }
+    protected $accountId,$currency=null;
 
-    /**
-     * @return mixed
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-    /**
-     * @param mixed $username
-     * @return BalanceRequest
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
-        return $this;
+    public function __construct($accountId=null,$currency=null){
+        $this->setAccountId($accountId)->setCurrency($currency);
     }
 
     /**
@@ -45,29 +31,11 @@ class BalanceRequest
 
     /**
      * @param mixed $accountId
-     * @return BalanceRequest
+     * @return $this
      */
     public function setAccountId($accountId)
     {
         $this->accountId = $accountId;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
-     * @param mixed $password
-     * @return BalanceRequest
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
         return $this;
     }
 
@@ -80,7 +48,8 @@ class BalanceRequest
     }
 
     /**
-     * @param null $currency
+     * @param $currency
+     * @return $this
      */
     public function setCurrency($currency)
     {

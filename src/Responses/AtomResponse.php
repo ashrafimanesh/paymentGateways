@@ -9,7 +9,7 @@
 namespace Ashrafi\PaymentGateways\Responses;
 
 
-class AtomResponse
+trait AtomResponse
 {
     protected $status=false,$message='';
 

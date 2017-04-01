@@ -12,8 +12,9 @@ namespace Ashrafi\PaymentGateways\Responses;
 use Ashrafi\PaymentGateways\Collection;
 use Ashrafi\PaymentGateways\Requests\Request;
 
-class Response extends AtomResponse
+class Response
 {
+    use AtomResponse;
     use Collection;
 
     const SuccessPayRequest='SuccessPayRequest';
@@ -34,7 +35,10 @@ class Response extends AtomResponse
      * @param int $code
      */
     public function __construct(Request $request=null,$status=false,$message='',$code=1){
-        $this->setRequest($request)->setCode($code)->setStatus($status)->setMessage($message)->setOrderId($request->getOrderId())->setGatewayOrderId($request->getGatewayOrderId());
+        $this->setRequest($request)->setCode($code)->setStatus($status)->setMessage($message);
+        if($request instanceof Request){
+            $this->setOrderId($request->getOrderId())->setGatewayOrderId($request->getGatewayOrderId());
+        }
     }
 
     /**
@@ -111,6 +115,11 @@ class Response extends AtomResponse
     }
 
 
+    /**
+     * copy Response class attributes to called class attributes
+     * @param Response $response
+     * @return mixed
+     */
     public static function copy(Response $response){
         $class=get_called_class();
         $instance=new $class($response->getRequest());

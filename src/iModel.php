@@ -5,6 +5,7 @@ use Ashrafi\PaymentGateways\Requests\BalanceRequest;
 use Ashrafi\PaymentGateways\Requests\CallbackRequest;
 use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Requests\TransferRequest;
 
 /**
  *
@@ -39,4 +40,10 @@ interface iModel {
      * @return Responses\BalanceResponse
      */
     function getBalance(BalanceRequest $balanceRequest);
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @return TransferResponse
+     */
+    function transfer(TransferRequest $transferRequest);
 }
