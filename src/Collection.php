@@ -14,6 +14,9 @@ trait Collection
     use Convert;
     protected $orderId,$gatewayOrderId;
 
+    /**
+     * @return $this
+     */
     public function save(){
         $this->created_at=time();
         $ex=explode('\\',get_class($this));
@@ -24,6 +27,10 @@ trait Collection
         return $this;
     }
 
+    /**
+     * @param $status
+     * @return $this
+     */
     public function saveFinalStatus($status){
         if(isset($this->log) && isset($this->log['path'])){
             file_put_contents($this->log['path'].'/final_status',$status,LOCK_EX);
@@ -64,7 +71,7 @@ trait Collection
 
     /**
      * @param int $orderId
-     * @return Request
+     * @return $this
      */
     public function setOrderId($orderId)
     {
@@ -82,7 +89,7 @@ trait Collection
 
     /**
      * @param mixed $gatewayOrderId
-     * @return CallbackResponse
+     * @return $this
      */
     public function setGatewayOrderId($gatewayOrderId)
     {

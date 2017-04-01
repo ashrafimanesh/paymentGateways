@@ -97,7 +97,7 @@ class Model extends PaymentGatewayModel
         $result=null;
         if($confirmRequest->getGatewayOrderId()) {
             $url='https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL';
-            $client=$this->_getConnector($url);
+            $client=$this->_getConnector($url,SoapConnector::class);
             $result = $client->run('verifyTransaction',[$confirmRequest->getGatewayOrderId(), $this->MID]);
         }
         $confirmResponse=new ConfirmResponse($confirmRequest);
@@ -115,9 +115,10 @@ class Model extends PaymentGatewayModel
      * @param BalanceRequest $balanceRequest
      * @return BalanceResponse
      */
-    protected function _getBalance(BalanceRequest $balanceRequest)
+    protected function _getBalance(BalanceRequest $balanceRequest=null)
     {
-        $balanceResponse=new BalanceResponse($balanceRequest->getUsername());
+
+        $balanceResponse=new BalanceResponse(($balanceRequest instanceof BalanceRequest) ? $balanceRequest->getUsername() : '');
         $balanceResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in saman gateway');
         return $balanceResponse;
     }
@@ -163,7 +164,7 @@ class Model extends PaymentGatewayModel
                 'ResNum' => $orderId,
             ];
             $url='https://sep.shaparak.ir/Payments/InitPayment.asmx?WSDL';
-            $client = $this->_getConnector($url);
+            $client = $this->_getConnector($url,SoapConnector::class);
             $i = 0;
             while ($i < 2) {
                 $i++;

@@ -37,7 +37,7 @@ class BalanceResponse
      * @param null $currency
      * @return AccountBalance
      */
-    protected function addAccount($accountId,$balance=0,$currency=null){
+    public function addAccount($accountId,$balance=0,$currency=null){
         if(!isset($this->accountsId[$accountId])){
             $this->accountsId[$accountId]=new AccountBalance($accountId,$balance,$currency);
         }

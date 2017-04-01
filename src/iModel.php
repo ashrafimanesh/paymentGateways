@@ -39,7 +39,7 @@ interface iModel {
      * @param BalanceRequest $balanceRequest
      * @return Responses\BalanceResponse
      */
-    function getBalance(BalanceRequest $balanceRequest);
+    function getBalance(BalanceRequest $balanceRequest=null);
 
     /**
      * @param TransferRequest $transferRequest

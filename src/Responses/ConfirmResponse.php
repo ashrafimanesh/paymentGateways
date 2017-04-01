@@ -11,7 +11,17 @@ namespace Ashrafi\PaymentGateways\Responses;
 
 class ConfirmResponse extends Response
 {
-    protected $amount;
+    protected $amount,$accountId=null;
+
+    /**
+     * @param Request $request
+     * @param bool|false $status
+     * @param string $message
+     * @param int $code
+     */
+    public function __construct(Request $request=null,$status=false,$message='',$code=1){
+        parent::__construct($request,$status,$message,$code);
+    }
 
     /**
      * @return mixed
@@ -30,6 +40,25 @@ class ConfirmResponse extends Response
         $this->amount = $amount;
         return $this;
     }
+
+    /**
+     * @return null
+     */
+    public function getAccountId()
+    {
+        return $this->accountId;
+    }
+
+    /**
+     * @param null $accountId
+     * @return $this
+     */
+    public function setAccountId($accountId)
+    {
+        $this->accountId = $accountId;
+        return $this;
+    }
+
 
 
 }

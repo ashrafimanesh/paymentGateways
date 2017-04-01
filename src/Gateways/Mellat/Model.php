@@ -2,13 +2,17 @@
 
 namespace Ashrafi\PaymentGateways\Gateways\Mellat;
 
-use Ashrafi\PaymentGateways\CallbackRequest;
-use Ashrafi\PaymentGateways\CallbackResponse;
-use Ashrafi\PaymentGateways\ConfirmRequest;
-use Ashrafi\PaymentGateways\ConfirmResponse;
+use Ashrafi\PaymentGateways\Requests\BalanceRequest;
+use Ashrafi\PaymentGateways\Requests\TransferRequest;
+use Ashrafi\PaymentGateways\Responses\BalanceResponse;
+use Ashrafi\PaymentGateways\Requests\CallbackRequest;
+use Ashrafi\PaymentGateways\Responses\CallbackResponse;
+use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
+use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
 use Ashrafi\PaymentGateways\Model as PaymentGatewayModel;
-use Ashrafi\PaymentGateways\PayRequest;
-use Ashrafi\PaymentGateways\Response;
+use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Responses\Response;
+use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\NusoapConnector;
 use Ashrafi\PhpConnectors\SoapConnector;
@@ -161,6 +165,27 @@ class Model extends PaymentGatewayModel
             $confirmResponse->setStatus(false)->setMessage((-1*$result));
         }
         return $confirmResponse;
+    }
+
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @return BalanceResponse
+     */
+    protected function _getBalance(BalanceRequest $balanceRequest=null)
+    {
+        $balanceResponse=new BalanceResponse(($balanceRequest instanceof BalanceRequest) ? $balanceRequest->getUsername() : '');
+        $balanceResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in mellat gateway');
+        return $balanceResponse;
+    }
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @return TransferResponse
+     */
+    protected function _transfer(TransferRequest $transferRequest)
+    {
+        $transferResponse=new TransferResponse($transferRequest,false,'Method '.__FUNCTION__.' does not exist in mellat gateway');
+        return $transferResponse;
     }
 
     /**

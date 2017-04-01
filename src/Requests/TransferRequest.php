@@ -15,7 +15,7 @@ class TransferRequest extends Request
 {
     use AccountTrait;
 
-    protected $payer,$payee,$description='';
+    protected $payer,$payee,$amount,$description='',$inputs=[];
 
     public function __construct($username=null,$password=null,$orderId=0,$gatewayOrderId=null){
         parent::__construct($orderId,$gatewayOrderId);
@@ -57,7 +57,26 @@ class TransferRequest extends Request
         $this->payee = $payee;
         return $this;
     }
-    
+
+    /**
+     * @return mixed
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param mixed $amount
+     * @return $this
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+        return $this;
+    }
+
+
     /**
      * @return string
      */
@@ -75,6 +94,26 @@ class TransferRequest extends Request
         $this->description = $description;
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function getInputs()
+    {
+        return $this->inputs;
+    }
+
+    /**
+     * @param array $inputs
+     * @return $this
+     */
+    public function setInputs($inputs)
+    {
+        $this->inputs = $inputs;
+        return $this;
+    }
+
+
 
 
 }

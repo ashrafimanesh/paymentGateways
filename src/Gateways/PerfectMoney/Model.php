@@ -38,59 +38,144 @@ class Model extends PaymentGatewayModel
 
     protected function _pay(PayRequest $payRequest)
     {
-        // TODO: Implement _pay() method.
+        $url='https://perfectmoney.is/acct/ev_create.asp';
+        $authParams=$this->_getAuthParams();
+        $client=$this->_getConnector($url,CurlConnector::class);
+        $inputs=$payRequest->getInputs();
+        if(!isset($inputs['payerAccountId']) || !$inputs['payerAccountId']){
+            throw new \Exception('Please set payerAccountId with call $payRequest->setInputs([\'payerAccountId\'=>\'\'])');
+        }
+        $out=$client->run('',array_merge($authParams,['Amount'=>$payRequest->getAmount(),'Payer_Account'=>$inputs['payerAccountId']]));
+
+        $ar = $this->_parseResponse($out);
+
+        $payResponse=new Responses\Response($payRequest,false);
+        $payResponse->setGatewayResponses($ar);
+
+        if(isset($ar['ERROR'])){
+            $payResponse->setStatus(false)->setMessage($ar['ERROR']);
+        }
+        else{
+            $payResponse->setStatus(true)->setGatewayOrderId($ar['VOUCHER_NUM']);
+        }
+        return $payResponse;
     }
 
     protected function _callback(CallbackRequest $callbackRequest)
     {
-        // TODO: Implement _callback() method.
+        $callbackResponse=new Responses\CallbackResponse($callbackRequest);
+        $callbackResponse->setStatus(true);
+        return $callbackResponse;
     }
 
     protected function _confirm(ConfirmRequest $confirmRequest)
     {
-        // TODO: Implement _confirm() method.
+        $url='https://perfectmoney.is/acct/ev_activate.asp';
+        $client=$this->_getConnector($url,CurlConnector::class);
+
+        $inputs=$confirmRequest->getInputs();
+        if(!isset($inputs['VOUCHER_CODE']) || !$inputs['VOUCHER_CODE']){
+            throw new \Exception('Invalid VOUCHER_CODE. Please Set $confirmRequest->setInputs([\'VOUCHER_CODE\'=>\'_code_\'])');
+        }
+        $authParams=$this->_getAuthParams();
+        $out=$client->run('',array_merge($authParams,['Payee_Account'=>$confirmRequest->getAccountId(),'ev_number'=>$confirmRequest->getGatewayOrderId(),'ev_code'=>$inputs['VOUCHER_CODE']]));
+
+        $ar = $this->_parseResponse($out);
+
+        $confirmResponse=new Responses\ConfirmResponse($confirmRequest);
+
+        $confirmResponse->setGatewayResponses($ar);
+
+        if(isset($ar['ERROR'])){
+            $confirmResponse->setStatus(false)->setMessage($ar['ERROR']);
+        }
+        else{
+            $confirmResponse->setStatus(true)->setGatewayOrderId($ar['VOUCHER_NUM'])->setAccountId($ar['Payee_Account'])->setAmount($ar['VOUCHER_AMOUNT']);
+        }
+
+        return $confirmResponse;
     }
 
-    protected function _getBalance(BalanceRequest $balanceRequest)
+    protected function _getBalance(BalanceRequest $balanceRequest=null)
     {
-        $balanceRequest->setUsername($this->accountId)->setPassword($this->passPhrase);
         $url='https://perfectmoney.is/acct/balance.asp';
 
-        $client=$this->_getConnector($url,CurlConnector::class,AbstractConnectors::ProxyTypeUrl);
-        $result=$client->run('',['AccountID'=>$this->accountId,'PassPhrase'=>$this->passPhrase]);
-
-        $accountsInfo=$this->_parseBalanceResult($result);
-
-        $balanceResponse=new Responses\BalanceResponse($balanceRequest->getUsername(),$accountsInfo);
-
-        if($accountsInfo && sizeof($accountsInfo)){
-            $balanceResponse->setStatus(true);
+        $client=$this->_getConnector($url,CurlConnector::class);
+        $out=$client->run('', $this->_getAuthParams());
+        // searching for hidden fields
+        $ar = $this->_parseResponse($out);
+        $accountsInfo=[];
+        $balanceResponse=new Responses\BalanceResponse($this->accountId,$accountsInfo);
+        if(isset($ar['ERROR'])){
+            $balanceResponse->setStatus(false)->setMessage($ar['ERROR']);
+            return $balanceResponse;
         }
+
+        foreach($ar as $accountId=>$balance){
+            $balanceResponse->addAccount($accountId,$balance,($accountId[0]=='U' ? 'USD' : ($accountId[0]=='E' ? 'EUR' : '' )));
+        }
+
         return $balanceResponse;
     }
 
     protected function _transfer(TransferRequest $transferRequest)
     {
-        // TODO: Implement _transfer() method.
+        $transferRequest->setUsername($this->accountId)->setPassword($this->passPhrase);
+
+        $inputs=$transferRequest->getInputs();
+
+        $url='https://perfectmoney.is/acct/confirm.asp';
+        $client=$this->_getConnector($url,CurlConnector::class);
+
+        $authParams=$this->_getAuthParams();
+        $params=array_merge($authParams,[
+                'Payer_Account'=>$transferRequest->getPayer(),
+            'Payee_Account'=>$transferRequest->getPayee(),
+            'Amount'=>$transferRequest->getAmount(),
+            'PAYMENT_ID'=>$transferRequest->getOrderId()
+        ]);
+        $out=$client->run('',$params+$inputs);
+
+        $ar = $this->_parseResponse($out);
+
+        $transferResponse=new TransferResponse($transferRequest,false);
+        $transferResponse->setGatewayResponses($ar);
+
+        if(isset($ar['ERROR'])){
+            $transferResponse->setStatus(false)->setMessage($ar['ERROR']);
+        }
+        else{
+            $transferResponse->setStatus(true);
+        }
+
+        return $transferResponse;
     }
 
-    private function _parseBalanceResult($result)
+    /**
+     * @return array
+     */
+    protected function _getAuthParams()
     {
-        $pageDom = new \DOMDocument();
-        $result=mb_convert_encoding($result, 'HTML-ENTITIES', "UTF-8");
-        $pageDom->loadHTML($result);
+        return ['AccountID' => $this->accountId, 'PassPhrase' => $this->passPhrase];
+    }
 
-//        $html=str_get_html($result);
-        $trs=$pageDom->getElementsByTagName('tr');
-        $accountsInfo=[];
-        if($trs->length>0){
-            for($i=1;$i<$trs->length;$i++){
-                $accountId=$trs[$i]->childNodes[0]->textContent;
-                $balance=$trs[$i]->childNodes[1]->textContent;
-                $accountsInfo[]=['id'=>$accountId,'balance'=>$balance,'currency'=>($accountId[0]=='U' ? 'USD' : ($accountId[0]=='E' ? 'EUR' : '' ))];
-            }
+    /**
+     * @param $out
+     * @return string
+     * @throws \Exception
+     */
+    protected function _parseResponse($out)
+    {
+// searching for hidden fields
+        if (!preg_match_all("/<input name='(.*)' type='hidden' value='(.*)'>/", $out, $result, PREG_SET_ORDER)) {
+            throw new \Exception('Invalid output');
         }
-        return $accountsInfo;
+        $ar = "";
+        foreach ($result as $item) {
+            $key = $item[1];
+            $ar[$key] = $item[2];
+        }
+        return $ar;
     }
 
 }

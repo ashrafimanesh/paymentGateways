@@ -53,7 +53,7 @@ abstract class Model implements iModel
      * @param BalanceRequest $balanceRequest
      * @return Responses\BalanceResponse
      */
-    abstract protected function _getBalance(BalanceRequest $balanceRequest);
+    abstract protected function _getBalance(BalanceRequest $balanceRequest=null);
 
     /**
      * @param TransferRequest $transferRequest
@@ -147,7 +147,7 @@ abstract class Model implements iModel
      * @param BalanceRequest $balanceRequest
      * @return Responses\BalanceResponse
      */
-    function getBalance(BalanceRequest $balanceRequest)
+    function getBalance(BalanceRequest $balanceRequest=null)
     {
         $this->calledClass=get_called_class();
 
@@ -203,7 +203,7 @@ abstract class Model implements iModel
      * @param $url
      * @return AbstractConnectors
      */
-    protected function _getConnector($url, $class=SoapConnector::class,$type=AbstractConnectors::ProxyTypeUrl)
+    protected function _getConnector($url, $class=SoapConnector::class)
     {
         switch($class){
             case CurlConnector::class:
@@ -215,8 +215,11 @@ abstract class Model implements iModel
                 break;
 
         }
-        if ($this->config['proxy']['enable'] && $this->config['proxy'][$proxyAddressIndex]) {
-            $client = $class::getInstance($url, $this->config['proxy'][$proxyAddressIndex], null, $type);
+        if ($this->config['proxy']['enable'] &&  $this->config['proxy'][$proxyAddressIndex]) {
+            if(!in_array($this->config['proxy']['type'],[AbstractConnectors::ProxyTypeUrl,AbstractConnectors::ProxyTypeHttp])){
+                throw new \Exception('Invalid proxy type set in config/app.php or env file');
+            }
+            $client = $class::getInstance($url, $this->config['proxy'][$proxyAddressIndex], null, $this->config['proxy']['type']);
         } else {
             $client = $class::getInstance($url);
         }
