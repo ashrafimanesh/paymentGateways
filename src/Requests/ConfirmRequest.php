@@ -11,8 +11,8 @@ namespace Ashrafi\PaymentGateways\Requests;
 
 class ConfirmRequest extends Request
 {
-    protected $accountId=null,$inputs=[];
-    public function __construct($orderId,$gatewayOrderId){
+    public $accountId=null,$inputs=[];
+    public function __construct($orderId,$gatewayOrderId=null){
         $this->setOrderId($orderId);
         $this->setGatewayOrderId($gatewayOrderId);
     }

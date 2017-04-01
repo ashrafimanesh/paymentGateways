@@ -13,6 +13,7 @@ use Ashrafi\PaymentGateways\Requests\BalanceRequest;
 use Ashrafi\PaymentGateways\Requests\CallbackRequest;
 use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
+use Ashrafi\PaymentGateways\Requests\Request;
 use Ashrafi\PaymentGateways\Requests\TransferRequest;
 use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PaymentGateways\Responses\CallbackResponse;
@@ -192,7 +193,7 @@ abstract class Model implements iModel
     {
         $finalResponse = Response::getSavedResponse($request, ConfirmResponse::class);
         if (!$finalResponse) {
-            $finalResponse = Response::getSavedResponse($request, ConfirmRequest::class);
+            $finalResponse = Response::getSavedResponse($request, ConfirmResponse::class);
             return $finalResponse;
         }
         return $finalResponse;

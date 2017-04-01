@@ -112,7 +112,7 @@ class Model extends PaymentGatewayModel
         }
 
         foreach($ar as $accountId=>$balance){
-            $balanceResponse->addAccount($accountId,$balance,($accountId[0]=='U' ? 'USD' : ($accountId[0]=='E' ? 'EUR' : '' )));
+            $balanceResponse->addAccount($accountId,$balance,($accountId[0]=='U' ? 'USD' : ($accountId[0]=='E' ? 'EUR' : ($accountId[0]=='B' ? 'BTC' : '' ) )));
         }
 
         return $balanceResponse;

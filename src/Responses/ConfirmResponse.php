@@ -9,6 +9,8 @@
 namespace Ashrafi\PaymentGateways\Responses;
 
 
+use Ashrafi\PaymentGateways\Requests\Request;
+
 class ConfirmResponse extends Response
 {
     protected $amount,$accountId=null;

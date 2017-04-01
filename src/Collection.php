@@ -9,6 +9,8 @@
 namespace Ashrafi\PaymentGateways;
 
 
+use Ashrafi\PaymentGateways\Requests\Request;
+
 trait Collection
 {
     use Convert;
