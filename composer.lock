@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "554ed80662fafd097f60aed391aa7e09",
-    "content-hash": "2bc08de93c2cc14fecbea7efc2096565",
+    "hash": "561911d8bab01453d1fb7faa9d12e3f9",
+    "content-hash": "8e01426d9dc373f9b9661e404c9ecf4e",
     "packages": [
         {
             "name": "ashrafi/php-connectors",
