@@ -10,9 +10,11 @@ namespace Ashrafi\PaymentGateways\Responses;
 
 
 use Ashrafi\PaymentGateways\Collection;
+use Ashrafi\PaymentGateways\iRequest;
+use Ashrafi\PaymentGateways\iResponse;
 use Ashrafi\PaymentGateways\Requests\Request;
 
-class Response
+class Response implements iResponse
 {
     use AtomResponse;
     use Collection;
@@ -26,7 +28,7 @@ class Response
     const FailedConfirm='FailedConfirm';
 
     protected $request,$code;
-    public $gatewayResponses,$html;
+    public $html;
 
     /**
      * @param Request $request
@@ -78,7 +80,7 @@ class Response
     }
 
     /**
-     * @return mixed
+     * @return iRequest
      */
     public function getRequest()
     {
@@ -86,32 +88,13 @@ class Response
     }
 
     /**
-     * @param mixed $request
+     * @param iRequest|null $request
      * @return $this
      */
-    public function setRequest(Request $request)
+    public function setRequest(iRequest $request=null)
     {
         $this->request = $request;
         return $this;
-    }
-
-
-    /**
-     * @param $gatewayResponses
-     * @return Response
-     */
-    public function setGatewayResponses($gatewayResponses)
-    {
-        $this->gatewayResponses = $gatewayResponses;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getGatewayResponses()
-    {
-        return $this->gatewayResponses;
     }
 
 

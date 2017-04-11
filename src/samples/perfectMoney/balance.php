@@ -8,7 +8,6 @@
 
 require_once __DIR__ . '/../loader.php';
 
-
 $pmConfig=new \Ashrafi\PaymentGateways\Gateways\PerfectMoney\PerfectMoneyConfig(
     \Ashrafi\PaymentGateways\Gateways\PerfectMoney\Model::class,array_merge($configs['gateways']['perfectMoney'])
 );
@@ -16,12 +15,12 @@ $pmConfig=new \Ashrafi\PaymentGateways\Gateways\PerfectMoney\PerfectMoneyConfig(
 
 $gateway=\Ashrafi\PaymentGateways\GatewayFactory::getInstance(['pm'=>$pmConfig],['proxy'=>$configs['proxy']]);
 
-$transferRequest=new \Ashrafi\PaymentGateways\Requests\TransferRequest();
-$transferRequest->setPayer($_GET['payer_account_id'])->setPayee($_GET['payee_account_id'])->setAmount($_GET['amount']);
+$model=new \Ashrafi\PaymentGateways\Gateways\PerfectMoney\Model();
 
-$transferResponse=new \Ashrafi\PaymentGateways\Responses\TransferResponse($transferRequest);
+$balanceRequest=new \Ashrafi\PaymentGateways\Requests\BalanceRequest();
 
-$gateway->pm->transfer($transferRequest,$transferResponse);
+$balanceResponse=new \Ashrafi\PaymentGateways\Responses\BalanceResponse($gateway->pm->getAccountId());
 
+$gateway->pm->getBalance($balanceRequest,$balanceResponse);
 echo '<pre>';
-var_dump($transferResponse);
+var_dump($balanceResponse);

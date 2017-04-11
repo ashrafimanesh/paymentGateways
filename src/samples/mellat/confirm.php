@@ -17,4 +17,4 @@ $confirmResponse=new \Ashrafi\PaymentGateways\Responses\ConfirmResponse($confirm
 
 $gateway->saman->confirm($confirmRequest,$confirmResponse);
 
-dd($confirmResponse->toArray());
+var_dump($confirmResponse->toArray());

@@ -11,7 +11,7 @@ namespace Ashrafi\PaymentGateways\Responses;
 
 trait AtomResponse
 {
-    protected $status=false,$message='';
+    protected $status=false,$message='',$gatewayResponses;
 
     /**
      * @return mixed
@@ -47,5 +47,24 @@ trait AtomResponse
     {
         $this->message = $message;
         return $this;
+    }
+
+
+    /**
+     * @param $gatewayResponses
+     * @return Response
+     */
+    public function setGatewayResponses($gatewayResponses)
+    {
+        $this->gatewayResponses = $gatewayResponses;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGatewayResponses()
+    {
+        return $this->gatewayResponses;
     }
 }

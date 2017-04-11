@@ -29,21 +29,24 @@ class Model extends PaymentGatewayModel
     private $MID = '';
 
     public function __construct(){
-        parent::__construct();
-        $this->MID=$this->config['gateways']['saman']['MID'];
-        if(!$this->MID){
-            throw new \Exception('Please set saman MID in config. Read config/app.php for more detail');
+
+    }
+
+    protected function _initConfigs()
+    {
+        if(!isset($this->config['MID']) || !$this->config['MID']){
+            throw new \Exception('Please set saman MID in config.');
         }
+        $this->MID=$this->config['MID'];
     }
 
     /**
      * call pay webservice
      * @param PayRequest $payRequest
-     * @return Response
+     * @param Response $payResponse
      */
-    protected function _pay(PayRequest $payRequest)
+    protected function _pay(PayRequest $payRequest,Response $payResponse)
     {
-        $payResponse=new Response($payRequest);
         try{
             //get token from saman bank
             $token=$this->_token($payRequest->getAmount(),$payRequest->getOrderId());
@@ -67,12 +70,14 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param CallbackRequest $callbackRequest
-     * @return CallbackResponse
+     * @param CallbackResponse $callbackResponse
+     * @throws \Exception
      */
-    protected function _callback(CallbackRequest $callbackRequest)
+    protected function _callback(CallbackRequest $callbackRequest,CallbackResponse $callbackResponse)
     {
+        
+
         $inputs=$callbackRequest->getGatewayResponses();
-        $callbackResponse=new CallbackResponse($callbackRequest);
         $callbackResponse->setMessage($inputs['State']);
         switch(true){
             case $inputs['StateCode']==-1:
@@ -90,17 +95,19 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param ConfirmRequest $confirmRequest
+     * @param ConfirmResponse $confirmResponse
      * @return ConfirmResponse
+     * @throws \Exception
      */
-    protected function _confirm(ConfirmRequest $confirmRequest)
+    protected function _confirm(ConfirmRequest $confirmRequest,ConfirmResponse $confirmResponse)
     {
+
         $result=null;
         if($confirmRequest->getGatewayOrderId()) {
             $url='https://sep.shaparak.ir/payments/referencepayment.asmx?WSDL';
             $client=$this->_getConnector($url,SoapConnector::class);
             $result = $client->run('verifyTransaction',[$confirmRequest->getGatewayOrderId(), $this->MID]);
         }
-        $confirmResponse=new ConfirmResponse($confirmRequest);
         $confirmResponse->setGatewayResponses($result);
         if($result>0){
             $confirmResponse->setStatus(true)->setAmount($result);
@@ -113,23 +120,25 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param BalanceRequest $balanceRequest
+     * @param BalanceResponse $balanceResponse
      * @return BalanceResponse
      */
-    protected function _getBalance(BalanceRequest $balanceRequest=null)
+    protected function _getBalance(BalanceRequest $balanceRequest=null,BalanceResponse $balanceResponse)
     {
 
-        $balanceResponse=new BalanceResponse(($balanceRequest instanceof BalanceRequest) ? $balanceRequest->getUsername() : '');
+//        $balanceResponse=new BalanceResponse(($balanceRequest instanceof BalanceRequest) ? $balanceRequest->getUsername() : '');
         $balanceResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in saman gateway');
         return $balanceResponse;
     }
 
     /**
      * @param TransferRequest $transferRequest
+     * @param TransferResponse $transferResponse
      * @return TransferResponse
      */
-    protected function _transfer(TransferRequest $transferRequest)
+    protected function _transfer(TransferRequest $transferRequest,TransferResponse $transferResponse)
     {
-        $transferResponse=new TransferResponse($transferRequest,false,'Method '.__FUNCTION__.' does not exist in saman gateway');
+        $transferResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in saman gateway');
         return $transferResponse;
     }
 

@@ -17,4 +17,4 @@ $callbackResponse=new \Ashrafi\PaymentGateways\Responses\CallbackResponse($callb
 
 $gateway->saman->callback($callbackRequest,$callbackResponse);
 
-dd($callbackResponse);
+var_dump($callbackResponse);

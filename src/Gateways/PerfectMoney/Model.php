@@ -14,7 +14,10 @@ use Ashrafi\PaymentGateways\Requests\CallbackRequest;
 use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
 use Ashrafi\PaymentGateways\Requests\TransferRequest;
-use Ashrafi\PaymentGateways\Responses;
+use Ashrafi\PaymentGateways\Responses\BalanceResponse;
+use Ashrafi\PaymentGateways\Responses\CallbackResponse;
+use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
+use Ashrafi\PaymentGateways\Responses\Response;
 use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\ConnectorFactory;
@@ -22,21 +25,25 @@ use Ashrafi\PhpConnectors\CurlConnector;
 
 class Model extends PaymentGatewayModel
 {
-    private $accountId = '',$passPhrase='';
+    protected $accountId = '',$passPhrase='';
 
-    public function __construct(){
-        parent::__construct();
-        $this->accountId=$this->config['gateways']['perfectMoney']['accountId'];
-        $this->passPhrase=$this->config['gateways']['perfectMoney']['passPhrase'];
-        if(!$this->accountId){
+    /**
+     * set private configs
+     * @return mixed
+     */
+    protected function _initConfigs()
+    {
+        $this->setAccountId($this->config['accountId']);
+        $this->setPassPhrase($this->config['passPhrase']);
+        if(!$this->getAccountId()){
             throw new \Exception('Please set PerfectMoney accountId in config. Read config/app.php for more detail');
         }
-        if(!$this->passPhrase){
+        if(!$this->getPassPhrase()){
             throw new \Exception('Please set PerfectMoney passPhrase in config. Read config/app.php for more detail');
         }
     }
 
-    protected function _pay(PayRequest $payRequest)
+    protected function _pay(PayRequest $payRequest,Response $payResponse)
     {
         $url='https://perfectmoney.is/acct/ev_create.asp';
         $authParams=$this->_getAuthParams();
@@ -49,7 +56,6 @@ class Model extends PaymentGatewayModel
 
         $ar = $this->_parseResponse($out);
 
-        $payResponse=new Responses\Response($payRequest,false);
         $payResponse->setGatewayResponses($ar);
 
         if(isset($ar['ERROR'])){
@@ -61,14 +67,13 @@ class Model extends PaymentGatewayModel
         return $payResponse;
     }
 
-    protected function _callback(CallbackRequest $callbackRequest)
+    protected function _callback(CallbackRequest $callbackRequest,CallbackResponse $callbackResponse)
     {
-        $callbackResponse=new Responses\CallbackResponse($callbackRequest);
         $callbackResponse->setStatus(true);
         return $callbackResponse;
     }
 
-    protected function _confirm(ConfirmRequest $confirmRequest)
+    protected function _confirm(ConfirmRequest $confirmRequest,ConfirmResponse $confirmResponse)
     {
         $url='https://perfectmoney.is/acct/ev_activate.asp';
         $client=$this->_getConnector($url,CurlConnector::class);
@@ -82,8 +87,6 @@ class Model extends PaymentGatewayModel
 
         $ar = $this->_parseResponse($out);
 
-        $confirmResponse=new Responses\ConfirmResponse($confirmRequest);
-
         $confirmResponse->setGatewayResponses($ar);
 
         if(isset($ar['ERROR'])){
@@ -96,7 +99,7 @@ class Model extends PaymentGatewayModel
         return $confirmResponse;
     }
 
-    protected function _getBalance(BalanceRequest $balanceRequest=null)
+    protected function _getBalance(BalanceRequest $balanceRequest=null,BalanceResponse $balanceResponse)
     {
         $url='https://perfectmoney.is/acct/balance.asp';
 
@@ -104,8 +107,7 @@ class Model extends PaymentGatewayModel
         $out=$client->run('', $this->_getAuthParams());
         // searching for hidden fields
         $ar = $this->_parseResponse($out);
-        $accountsInfo=[];
-        $balanceResponse=new Responses\BalanceResponse($this->accountId,$accountsInfo);
+        $balanceResponse->setGatewayResponses($ar);
         if(isset($ar['ERROR'])){
             $balanceResponse->setStatus(false)->setMessage($ar['ERROR']);
             return $balanceResponse;
@@ -118,9 +120,9 @@ class Model extends PaymentGatewayModel
         return $balanceResponse;
     }
 
-    protected function _transfer(TransferRequest $transferRequest)
+    protected function _transfer(TransferRequest $transferRequest,TransferResponse $transferResponse)
     {
-        $transferRequest->setUsername($this->accountId)->setPassword($this->passPhrase);
+        $transferRequest->setUsername($this->getAccountId())->setPassword($this->getPassPhrase());
 
         $inputs=$transferRequest->getInputs();
 
@@ -138,7 +140,6 @@ class Model extends PaymentGatewayModel
 
         $ar = $this->_parseResponse($out);
 
-        $transferResponse=new TransferResponse($transferRequest,false);
         $transferResponse->setGatewayResponses($ar);
 
         if(isset($ar['ERROR'])){
@@ -156,7 +157,7 @@ class Model extends PaymentGatewayModel
      */
     protected function _getAuthParams()
     {
-        return ['AccountID' => $this->accountId, 'PassPhrase' => $this->passPhrase];
+        return ['AccountID' => $this->getAccountId(), 'PassPhrase' => $this->getPassPhrase()];
     }
 
     /**
@@ -178,4 +179,39 @@ class Model extends PaymentGatewayModel
         return $ar;
     }
 
+    /**
+     * @return string
+     */
+    public function getAccountId()
+    {
+        return $this->accountId;
+    }
+
+    /**
+     * @param string $accountId
+     * @return $this
+     */
+    public function setAccountId($accountId)
+    {
+        $this->accountId = $accountId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassPhrase()
+    {
+        return $this->passPhrase;
+    }
+
+    /**
+     * @param string $passPhrase
+     * @return $this
+     */
+    public function setPassPhrase($passPhrase)
+    {
+        $this->passPhrase = $passPhrase;
+        return $this;
+    }
 }

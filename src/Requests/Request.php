@@ -10,8 +10,9 @@ namespace Ashrafi\PaymentGateways\Requests;
 
 
 use Ashrafi\PaymentGateways\Collection;
+use Ashrafi\PaymentGateways\iRequest;
 
-class Request
+class Request implements iRequest
 {
     use Collection;
 

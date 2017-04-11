@@ -15,157 +15,201 @@ use Ashrafi\PaymentGateways\Requests\ConfirmRequest;
 use Ashrafi\PaymentGateways\Requests\PayRequest;
 use Ashrafi\PaymentGateways\Requests\Request;
 use Ashrafi\PaymentGateways\Requests\TransferRequest;
+use Ashrafi\PaymentGateways\Responses\BalanceResponse;
 use Ashrafi\PaymentGateways\Responses\TransferResponse;
 use Ashrafi\PaymentGateways\Responses\CallbackResponse;
 use Ashrafi\PaymentGateways\Responses\ConfirmResponse;
-use Ashrafi\PaymentGateways\Responses\Response;
+use Ashrafi\PaymentGateways\Responses\Response as PayResponse;
 use Ashrafi\PhpConnectors\AbstractConnectors;
 use Ashrafi\PhpConnectors\CurlConnector;
+use Ashrafi\PhpConnectors\NusoapConnector;
 use Ashrafi\PhpConnectors\SoapConnector;
 
 abstract class Model implements iModel
 {
-    protected $calledClass,$config;
+    protected $calledClass;
+    /**
+     * @var iConfig
+     */
+    protected $config;
+    protected $checkFinalStatus=false;
+    protected $innerCalledClass=null;
 
-    public function __construct(){
-        $config=require __DIR__.'/config/app.php';
-        $this->config=$config;
+    /**
+     * set private configs
+     * @return mixed
+     */
+    abstract protected function _initConfigs();
+
+
+    /**
+     * @param PayRequest $payRequest
+     * @param PayResponse $payResponse
+     */
+    abstract protected function _pay(PayRequest $payRequest,PayResponse $payResponse);
+
+    /**
+     * @param CallbackRequest $callbackRequest
+     * @param CallbackResponse $callbackResponse
+     */
+    abstract protected function _callback(CallbackRequest $callbackRequest,CallbackResponse $callbackResponse);
+
+    /**
+     * @param ConfirmRequest $confirmRequest
+     * @param ConfirmResponse $confirmResponse
+     */
+    abstract protected function _confirm(ConfirmRequest $confirmRequest,ConfirmResponse $confirmResponse);
+
+    /**
+     * @param BalanceRequest $balanceRequest
+     * @param BalanceResponse $BalanceResponse
+     */
+    abstract protected function _getBalance(BalanceRequest $balanceRequest=null,BalanceResponse $BalanceResponse);
+
+    /**
+     * @param TransferRequest $transferRequest
+     * @param TransferResponse $transferResponse
+     */
+    abstract protected function _transfer(TransferRequest $transferRequest,TransferResponse $transferResponse);
+
+    /**
+     * @param iConfig $config
+     * @param array $globalConfigs
+     * @return $this
+     */
+    function setConfig(iConfig $config,$globalConfigs=[])
+    {
+        $this->config=$config->getConfigs()+$globalConfigs;
+        $this->_initConfigs();
+        return $this;
     }
 
     /**
      * @param PayRequest $payRequest
-     * @return Responses\Response
+     * @param PayResponse $payResponse
+     * @return PayResponse
+     * @throws \Exception
      */
-    abstract protected function _pay(PayRequest $payRequest);
-
-    /**
-     * @param CallbackRequest $callbackRequest
-     * @return Responses\CallbackResponse
-     */
-    abstract protected function _callback(CallbackRequest $callbackRequest);
-
-    /**
-     * @param ConfirmRequest $confirmRequest
-     * @return Responses\ConfirmResponse
-     */
-    abstract protected function _confirm(ConfirmRequest $confirmRequest);
-
-    /**
-     * @param BalanceRequest $balanceRequest
-     * @return Responses\BalanceResponse
-     */
-    abstract protected function _getBalance(BalanceRequest $balanceRequest=null);
-
-    /**
-     * @param TransferRequest $transferRequest
-     * @return TransferResponse
-     */
-    abstract protected function _transfer(TransferRequest $transferRequest);
-
-    function pay(PayRequest $payRequest)
+    function pay(PayRequest $payRequest,PayResponse $payResponse)
     {
         $finalStatus=$payRequest->getFinalStatus();
-        if($finalStatus){
+        if($this->isCheckFinalStatus() && $finalStatus){
             throw new \Exception('Invalid order for pay. Current status is '.$finalStatus);
         }
         $this->calledClass=get_called_class();
-        $payRequest->save()->saveFinalStatus(Response::SuccessPayRequest);
+        $payRequest->save()->saveFinalStatus(PayResponse::SuccessPayRequest);
 
-        $payResponse=$this->_pay($payRequest);
+        $this->_pay($payRequest,$payResponse);
 
         $payResponse->save();
         if($payResponse->getStatus()){
-            $payResponse->saveFinalStatus(Response::SuccessPayResponse);
+            $payResponse->saveFinalStatus(PayResponse::SuccessPayResponse);
         }
         else{
-            $payResponse->saveFinalStatus(Response::FailedPay);
+            $payResponse->saveFinalStatus(PayResponse::FailedPay);
         }
         return $payResponse;
     }
 
-    function callback(CallbackRequest $callbackRequest)
+    /**
+     * @param CallbackRequest $callbackRequest
+     * @param CallbackResponse $callbackResponse
+     * @return CallbackResponse|null
+     * @throws \Exception
+     */
+    function callback(CallbackRequest $callbackRequest,CallbackResponse $callbackResponse)
     {
         $this->calledClass=get_called_class();
 
         $finalStatus=$callbackRequest->getFinalStatus();
-        if(!in_array($finalStatus,[Response::SuccessPayResponse])){
+        if($this->isCheckFinalStatus() && !in_array($finalStatus,[PayResponse::SuccessPayResponse])){
 
-            //get last response
-            $finalResponse = $this->_getFinalPayResponse($callbackRequest);
+            //get last PayResponse
+            $finalResponses = $this->_getFinalResponses($callbackRequest);
 
-            if(!$finalResponse){
+            if(!$finalResponses){
                 throw new \Exception('Invalid order for callback. Current status is '.$finalStatus);
             }
             else{
-                return $finalResponse;
+                return $finalResponses;
             }
         }
 
         $callbackRequest->save();
 
-        $callbackResponse=$this->_callback($callbackRequest);
+        $this->_callback($callbackRequest,$callbackResponse);
+
         $callbackResponse->setGatewayResponses($callbackRequest->getGatewayResponses());
         $callbackResponse->save();
         if($callbackResponse->getStatus()){
-            $callbackResponse->saveFinalStatus(Response::SuccessPaid);
+            $callbackResponse->saveFinalStatus(PayResponse::SuccessPaid);
         }
         else{
-            $callbackResponse->saveFinalStatus(Response::FailedPay);
+            $callbackResponse->saveFinalStatus(PayResponse::FailedPay);
         }
         return $callbackResponse;
     }
 
-    function confirm(ConfirmRequest $confirmRequest)
+    /**
+     * @param ConfirmRequest $confirmRequest
+     * @param ConfirmResponse $confirmResponse
+     * @return ConfirmResponse|null
+     * @throws \Exception
+     */
+    function confirm(ConfirmRequest $confirmRequest,ConfirmResponse $confirmResponse)
     {
         $this->calledClass=get_called_class();
         $finalStatus=$confirmRequest->getFinalStatus();
-        if(!in_array($finalStatus,[Response::FailedConfirm,Response::SuccessPaid])){
-            //get last response
-            $finalResponse = $this->_getFinalConfirmResponse($confirmRequest);
-            if(!$finalResponse){
-                $finalResponse=$this->_getFinalPayResponse($confirmRequest);
+        if($this->isCheckFinalStatus() && !in_array($finalStatus,[PayResponse::FailedConfirm,PayResponse::SuccessPaid])){
+            //get last PayResponse
+            $finalResponses = $this->_getFinalConfirmResponse($confirmRequest);
+            if(!$finalResponses){
+                $finalResponses=$this->_getFinalResponses($confirmRequest);
             }
-            if(!$finalResponse){
+            if(!$finalResponses){
                 throw new \Exception('Invalid order for confirm. Current status is '.$finalStatus);
             }
             else{
-                return $finalResponse;
+                return $finalResponses;
             }
         }
-        $confirmRequest->save()->saveFinalStatus(Response::SuccessConfirmRequest);
-        $confirmResponse=$this->_confirm($confirmRequest);
+        $confirmRequest->save()->saveFinalStatus(PayResponse::SuccessConfirmRequest);
+
+        $this->_confirm($confirmRequest,$confirmResponse);
+
         $confirmResponse->save();
         if($confirmResponse->getStatus()){
-            $confirmResponse->saveFinalStatus(Response::SuccessConfirm);
+            $confirmResponse->saveFinalStatus(PayResponse::SuccessConfirm);
         }
         else{
-            $confirmResponse->saveFinalStatus(Response::FailedConfirm);
+            $confirmResponse->saveFinalStatus(PayResponse::FailedConfirm);
         }
         return $confirmResponse;
     }
 
     /**
      * @param BalanceRequest $balanceRequest
-     * @return Responses\BalanceResponse
+     * @param BalanceResponse $BalanceResponse
      */
-    function getBalance(BalanceRequest $balanceRequest=null)
+    function getBalance(BalanceRequest $balanceRequest=null,BalanceResponse $BalanceResponse=null)
     {
         $this->calledClass=get_called_class();
 
-        $balanceResponse=$this->_getBalance($balanceRequest);
+        $this->_getBalance($balanceRequest,$BalanceResponse);
 
-        return $balanceResponse;
+        return $BalanceResponse;
     }
 
     /**
      * @param TransferRequest $transferRequest
+     * @param TransferResponse $transferResponse
      * @return TransferResponse
      */
-    function transfer(TransferRequest $transferRequest){
+    function transfer(TransferRequest $transferRequest,TransferResponse $transferResponse){
 
         $this->calledClass=get_called_class();
 
-        $transferResponse=$this->_transfer($transferRequest);
+        $this->_transfer($transferRequest,$transferResponse);
 
         return $transferResponse;
     }
@@ -175,14 +219,14 @@ abstract class Model implements iModel
      * @param Request $request
      * @return null
      */
-    protected function _getFinalPayResponse(Request $request)
+    protected function _getFinalResponses(Request $request)
     {
-        $finalResponse = Response::getSavedResponse($request, CallbackResponse::class);
-        if (!$finalResponse) {
-            $finalResponse = Response::getSavedResponse($request, CallbackRequest::class);
-            return $finalResponse;
+        $finalResponses = PayResponse::getSavedResponse($request, CallbackResponse::class);
+        if (!$finalResponses) {
+            $finalResponses = PayResponse::getSavedResponse($request, CallbackRequest::class);
+            return $finalResponses;
         }
-        return $finalResponse;
+        return $finalResponses;
     }
 
     /**
@@ -191,12 +235,12 @@ abstract class Model implements iModel
      */
     protected function _getFinalConfirmResponse(Request $request)
     {
-        $finalResponse = Response::getSavedResponse($request, ConfirmResponse::class);
-        if (!$finalResponse) {
-            $finalResponse = Response::getSavedResponse($request, ConfirmResponse::class);
-            return $finalResponse;
+        $finalResponses = PayResponse::getSavedResponse($request, ConfirmResponse::class);
+        if (!$finalResponses) {
+            $finalResponses = PayResponse::getSavedResponse($request, ConfirmResponse::class);
+            return $finalResponses;
         }
-        return $finalResponse;
+        return $finalResponses;
     }
 
 
@@ -210,13 +254,16 @@ abstract class Model implements iModel
             case CurlConnector::class:
                 $proxyAddressIndex='curlProxyAddress';
                 break;
+            case NusoapConnector::class:
+                $proxyAddressIndex='nusoapProxyAddress';
+                break;
             case SoapConnector::class:
             default:
                 $proxyAddressIndex='soapProxyAddress';
                 break;
 
         }
-        if ($this->config['proxy']['enable'] &&  $this->config['proxy'][$proxyAddressIndex]) {
+        if (isset($this->config['proxy']) && $this->config['proxy']['enable'] &&  $this->config['proxy'][$proxyAddressIndex]) {
             if(!in_array($this->config['proxy']['type'],[AbstractConnectors::ProxyTypeUrl,AbstractConnectors::ProxyTypeHttp])){
                 throw new \Exception('Invalid proxy type set in config/app.php or env file');
             }
@@ -227,4 +274,39 @@ abstract class Model implements iModel
         return $client;
     }
 
+    /**
+     * @return boolean
+     */
+    public function isCheckFinalStatus()
+    {
+        return $this->checkFinalStatus;
+    }
+
+    /**
+     * @param boolean $checkFinalStatus
+     * @return $this
+     */
+    public function setCheckFinalStatus($checkFinalStatus)
+    {
+        $this->checkFinalStatus = $checkFinalStatus;
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getInnerCalledClass()
+    {
+        return $this->innerCalledClass;
+    }
+
+    /**
+     * @param Model $innerCalledClass
+     * @return $this
+     */
+    public function setInnerCalledClass(Model $innerCalledClass)
+    {
+        $this->innerCalledClass = $innerCalledClass;
+        return $this;
+    }
 }

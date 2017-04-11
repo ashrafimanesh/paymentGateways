@@ -19,11 +19,11 @@ use Ashrafi\PhpConnectors\SoapConnector;
 class Model extends PaymentGatewayModel
 {
     private $userName, $terminalId, $userPassword ;
-    public function __construct(){
-        parent::__construct();
-        $this->userName=$this->config['gateways']['mellat']['userName'];
-        $this->terminalId=$this->config['gateways']['mellat']['terminalId'];
-        $this->userPassword=$this->config['gateways']['mellat']['userPassword'];
+
+    protected function _initConfigs(){
+        $this->userName=$this->config['userName'];
+        $this->terminalId=$this->config['terminalId'];
+        $this->userPassword=$this->config['userPassword'];
         if(!$this->userName){
             throw new \Exception('Please set mellat userName value in config. Read config/app.php for more detail');
         }
@@ -31,24 +31,21 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param PayRequest $payRequest
+     * @param Response $payResponse
      * @return Response
      */
-    protected function _pay(PayRequest $payRequest)
+    protected function _pay(PayRequest $payRequest,Response $payResponse)
     {
-        $payResponse=new Response($payRequest);
-//        return $this->_fakeResponce();
         //-- تبدیل اطلاعات به آرایه برای ارسال به بانک
         $parameters = $this->_getPayParams($payRequest);
         /**
          * get bank connection object
          */
         try{
-            if($this->config['proxy']['enable'] && $this->config['proxy']['nusoapProxyAddress']){
-                $client = NusoapConnector::getInstance('https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl',$this->config['proxy']['nusoapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
-            }
-            else{
-                $client = NusoapConnector::getInstance('https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl');
-            }
+            $url='https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl';
+
+            $client=$this->_getConnector($url,NusoapConnector::class);
+
             $namespace = 'http://interfaces.core.sw.bps.com/';
             $result = $client->run('bpPayRequest', [$parameters, $namespace]);
             $payResponse->setGatewayResponses($result);
@@ -57,31 +54,18 @@ class Model extends PaymentGatewayModel
             $payResponse->setMessage("There was a problem connecting to Bank");
             return $payResponse;
         }
-
-        if ($client->fault) {
-            $payResponse->setStatus(false);
-            $payResponse->setMessage("There was a problem connecting to Bank");
+        $res = explode(',', $result);
+        $ResCode = $res[0];
+        if ($ResCode == "0") {
+            $payResponse->setStatus(true);
+            $payResponse->setGatewayOrderId($res[1]);
+            //-- انتقال به درگاه پرداخت
+            $payResponse->setHtml('<form name="myform" action="https://bpm.shaparak.ir/pgwchannel/startpay.mellat" method="POST">
+                                        <input type="hidden" id="RefId" name="RefId" value="' . $res[1] . '">
+                                </form>
+                                <script type="text/javascript">window.onload = formSubmit; function formSubmit() { document.forms[0].submit(); }</script>');
         } else {
-            $err = $client->getError();
-            if ($err) {
-                $payResponse->setStatus(false);
-                $payResponse->setMessage($err);
-            } else {
-//                $response['data']=$result;
-                $res = explode(',', $result);
-                $ResCode = $res[0];
-                if ($ResCode == "0") {
-                    $payResponse->setStatus(true);
-                    $payResponse->setGatewayOrderId($res[1]);
-                    //-- انتقال به درگاه پرداخت
-                    $payResponse->setHtml('<form name="myform" action="https://bpm.shaparak.ir/pgwchannel/startpay.mellat" method="POST">
-                                                <input type="hidden" id="RefId" name="RefId" value="' . $res[1] . '">
-                                        </form>
-                                        <script type="text/javascript">window.onload = formSubmit; function formSubmit() { document.forms[0].submit(); }</script>');
-                } else {
-                    $payResponse->setStatus(false)->setMessage(-1*$result);
-                }
-            }
+            $payResponse->setStatus(false)->setMessage(-1*$result);
         }
 
         /**
@@ -92,12 +76,13 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param CallbackRequest $callbackRequest
+     * @param CallbackResponse $callbackResponse
      * @return CallbackResponse
+     * @throws \Exception
      */
-    protected function _callback(CallbackRequest $callbackRequest)
+    protected function _callback(CallbackRequest $callbackRequest,CallbackResponse $callbackResponse)
     {
         $inputs=$callbackRequest->getGatewayResponses();
-        $callbackResponse=new CallbackResponse($callbackRequest);
         if(!isset($inputs['SaleOrderId']) || !isset($inputs['SaleReferenceId']) || !isset($inputs['orderId'])){
             $callbackResponse->setStatus(false);
             $callbackResponse->setMessage('Invalid Response');
@@ -117,31 +102,36 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param ConfirmRequest $confirmRequest
+     * @param ConfirmResponse $confirmResponse
      * @return ConfirmResponse
      */
-    protected function _confirm(ConfirmRequest $confirmRequest)
+    protected function _confirm(ConfirmRequest $confirmRequest,ConfirmResponse $confirmResponse)
     {
-        $result=null;
+        $result=-1;
         if($confirmRequest->getGatewayOrderId()) {
-            if($this->config['proxy']['enable'] && $this->config['proxy']['nusoapProxyAddress']){
-                $client = NusoapConnector::getInstance('https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl',$this->config['proxy']['nusoapProxyAddress'],null,AbstractConnectors::ProxyTypeUrl);
-            }
-            else {
-                $client = NusoapConnector::getInstance('https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl');
-            }
-            $namespace = 'http://interfaces.core.sw.bps.com/';
-            $parameters = array(
-                'terminalId' => $this->terminalId,
-                'userName' => $this->userName,
-                'userPassword' => $this->userPassword,
-                'orderId' => $confirmRequest->getOrderId(),
-                'saleOrderId' => '',
-                'saleReferenceId' => $confirmRequest->getGatewayOrderId());
 
-            $result = $client->run('bpVerifyRequest',[$parameters, $namespace]);
+            try{
+                $url = 'https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl';
+                $client=$this->_getConnector($url,NusoapConnector::class);
+
+                $namespace = 'http://interfaces.core.sw.bps.com/';
+                $parameters = array(
+                    'terminalId' => $this->terminalId,
+                    'userName' => $this->userName,
+                    'userPassword' => $this->userPassword,
+                    'orderId' => $confirmRequest->getOrderId(),
+                    'saleOrderId' => '',
+                    'saleReferenceId' => $confirmRequest->getGatewayOrderId());
+
+                $result = $client->run('bpVerifyRequest',[$parameters, $namespace]);
+            }catch (\Exception $ex){
+                $confirmResponse->setStatus(false);
+                $confirmResponse->setMessage("There was a problem connecting to Bank");
+                return $confirmResponse;
+            }
         }
-        $confirmResponse=new ConfirmResponse($confirmRequest);
         $confirmResponse->setGatewayResponses($result);
+
 
         if($result == 0) {
             //-- وریفای به درستی انجام شد٬ درخواست واریز وجه
@@ -169,22 +159,23 @@ class Model extends PaymentGatewayModel
 
     /**
      * @param BalanceRequest $balanceRequest
+     * @param BalanceResponse $balanceResponse
      * @return BalanceResponse
      */
-    protected function _getBalance(BalanceRequest $balanceRequest=null)
+    protected function _getBalance(BalanceRequest $balanceRequest=null,BalanceResponse $balanceResponse)
     {
-        $balanceResponse=new BalanceResponse(($balanceRequest instanceof BalanceRequest) ? $balanceRequest->getUsername() : '');
         $balanceResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in mellat gateway');
         return $balanceResponse;
     }
 
     /**
      * @param TransferRequest $transferRequest
+     * @param TransferResponse $transferResponse
      * @return TransferResponse
      */
-    protected function _transfer(TransferRequest $transferRequest)
+    protected function _transfer(TransferRequest $transferRequest,TransferResponse $transferResponse)
     {
-        $transferResponse=new TransferResponse($transferRequest,false,'Method '.__FUNCTION__.' does not exist in mellat gateway');
+        $transferResponse->setStatus(false)->setMessage('Method '.__FUNCTION__.' does not exist in mellat gateway');
         return $transferResponse;
     }
 
