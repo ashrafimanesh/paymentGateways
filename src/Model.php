@@ -41,7 +41,6 @@ abstract class Model implements iModel
      */
     abstract protected function _initConfigs();
 
-
     /**
      * @param PayRequest $payRequest
      * @param PayResponse $payResponse

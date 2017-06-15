@@ -62,7 +62,7 @@ class Model extends PaymentGatewayModel
             $payResponse->setStatus(false)->setMessage($ar['ERROR']);
         }
         else{
-            $payResponse->setStatus(true)->setGatewayOrderId($ar['VOUCHER_NUM']);
+            $payResponse->setFormData($ar)->setStatus(true)->setGatewayOrderId($ar['VOUCHER_NUM']);
         }
         return $payResponse;
     }

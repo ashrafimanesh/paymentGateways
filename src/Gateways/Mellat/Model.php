@@ -57,8 +57,9 @@ class Model extends PaymentGatewayModel
         $res = explode(',', $result);
         $ResCode = $res[0];
         if ($ResCode == "0") {
-            $payResponse->setStatus(true);
-            $payResponse->setGatewayOrderId($res[1]);
+            $payResponse->setStatus(true)
+                ->setGatewayOrderId($res[1]);
+            $payResponse->setFormData(['action'=>'https://bpm.shaparak.ir/pgwchannel/startpay.mellat','RefId'=>$res[1]]);
             //-- انتقال به درگاه پرداخت
             $payResponse->setHtml('<form name="myform" action="https://bpm.shaparak.ir/pgwchannel/startpay.mellat" method="POST">
                                         <input type="hidden" id="RefId" name="RefId" value="' . $res[1] . '">

@@ -53,10 +53,10 @@ class Model extends PaymentGatewayModel
             $payResponse->setGatewayResponses($token);
             if(strlen($token)>10)
             {
-                $payResponse->setGatewayOrderId($token);
+                $payResponse->setGatewayOrderId($token)->setStatus(true);
 
-
-                $payResponse->setHtml($this->payHtmlForm($token,$payRequest->getCallbackUrl()))->setStatus(true);
+                $payResponse->setFormData(['action'=>'https://sep.shaparak.ir/Payment.aspx','token'=>$token,'callbackUrl'=>$payRequest->getCallbackUrl()]);
+                $payResponse->setHtml($this->createPayHtmlForm($token,$payRequest->getCallbackUrl()));
             }
             else{
                 $payResponse->setStatus(false)->setMessage($token);
@@ -148,7 +148,7 @@ class Model extends PaymentGatewayModel
         // TODO: Implement getServerAddress() method.
     }
 
-    protected function payHtmlForm($token,$callbackurl){
+    protected function createPayHtmlForm($token,$callbackurl){
         $html='<form action="https://sep.shaparak.ir/Payment.aspx" method="POST" id="myForm">';
         $html.= '<input type="hidden" name="Token" value="'.$token.'"/>';
         $html.= '<input type="hidden" name="RedirectURL" value="'.$callbackurl.'"/>';

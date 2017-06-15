@@ -19,6 +19,8 @@ class Response implements iResponse
     use AtomResponse;
     use Collection;
 
+    const TypeHtml=1;
+    const TypeFormData=2;
     const SuccessPayRequest='SuccessPayRequest';
     const SuccessPayResponse='SuccessPayResponse';
     const SuccessPaid='SuccessPaid';
@@ -28,7 +30,7 @@ class Response implements iResponse
     const FailedConfirm='FailedConfirm';
 
     protected $request,$code;
-    public $html;
+    public $html,$formData;
 
     /**
      * @param Request $request
@@ -94,6 +96,24 @@ class Response implements iResponse
     public function setRequest(iRequest $request=null)
     {
         $this->request = $request;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFormData()
+    {
+        return $this->formData;
+    }
+
+    /**
+     * @param mixed $formData
+     * @return Response
+     */
+    public function setFormData($formData)
+    {
+        $this->formData = $formData;
         return $this;
     }
 
