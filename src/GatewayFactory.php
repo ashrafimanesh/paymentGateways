@@ -27,8 +27,13 @@ class GatewayFactory
         $this->globalConfigs=$globalConfigs;
     }
 
+    /**
+     * @param $name
+     * @return iModel
+     */
     public function __get($name){
-        return $this->using($name);
+        $this->using=$name;
+        return $this->_getGateway();
     }
 
     /**
@@ -77,6 +82,7 @@ class GatewayFactory
         if(!($gateway instanceof iModel)){
             throw new \InvalidArgumentException('Invalid Argument');
         }
+        $gateway->setName($gatewayUniqueName);
         $gateway->setConfig($configs,$this->globalConfigs);
         $this->collection->add($gatewayUniqueName,$gateway);
     }

@@ -32,6 +32,7 @@ abstract class Model implements iModel
      * @var iConfig
      */
     protected $config;
+    protected $name;
     protected $checkFinalStatus=false;
     protected $innerCalledClass=null;
 
@@ -71,6 +72,21 @@ abstract class Model implements iModel
      */
     abstract protected function _transfer(TransferRequest $transferRequest,TransferResponse $transferResponse);
 
+    /**
+     * @param $name
+     * @return $this
+     */
+    public function setName($name){
+        $this->name=$name;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName(){
+        return $this->name;
+    }
     /**
      * @param iConfig $config
      * @param array $globalConfigs

@@ -19,6 +19,17 @@ use Ashrafi\PaymentGateways\Responses\TransferResponse;
 interface iModel {
 
     /**
+     * @param $name
+     * @return $this
+     */
+    function setName($name);
+
+    /**
+     * @return mixed
+     */
+    function getName();
+
+    /**
      * @param iConfig $config
      * @param array $globalConfigs
      * @return $this
