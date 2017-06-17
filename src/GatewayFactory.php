@@ -33,7 +33,7 @@ class GatewayFactory
      */
     public function __get($name){
         $this->using=$name;
-        return $this->_getGateway();
+        return $this->getGateway();
     }
 
     /**
@@ -46,7 +46,7 @@ class GatewayFactory
      */
     function __call($name, $arguments)
     {
-        $gateway=$this->_getGateway();
+        $gateway=$this->getGateway();
         if(!method_exists($gateway,$name)){
             throw new \InvalidArgumentException('Method does not exist in '.get_class($gateway));
         }
@@ -74,7 +74,7 @@ class GatewayFactory
      * @param iConfig $configs
      * @param $gatewayUniqueName
      */
-    protected function registerGateway(iConfig $configs,$gatewayUniqueName){
+    public function registerGateway(iConfig $configs,$gatewayUniqueName){
         $gateway=$configs->getHandler();
         if(is_string($gateway)){
             $gateway=new $gateway();
@@ -113,7 +113,7 @@ class GatewayFactory
     /**
      * @return iModel
      */
-    protected function _getGateway()
+    public function getGateway()
     {
         $collection = $this->getCollection();
 
