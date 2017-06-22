@@ -179,7 +179,7 @@ class Model extends PaymentGatewayModel
                 $i++;
                 $this->increaseTryCount();
                 $result = $client->run('RequestToken',[$request['TermID'], $request['ResNum'], $request['TotalAmount']]);
-                if (!strpos(" " . $result, '/')) {
+                if ($result) {
                     $i = 10;
                     break;
                 }
