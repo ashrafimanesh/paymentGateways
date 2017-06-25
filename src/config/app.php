@@ -23,6 +23,10 @@ return [
             'userPassword' => function_exists('env') ? env('payment_gateway_mellat_password') : ''
         ],
         'saman'=>['MID'=>function_exists('env') ? env('payment_gateway_saman_mid') : null],
+        'dalanpay'=>[
+            'apiKey'=>function_exists('env') ? env('payment_gateway_dalanpay_apiKey') : null,
+            'accountType'=>function_exists('env') ? env('payment_gateway_dalanpay_accountType') : 1
+        ],
         'perfectMoney'=>[
             'accountId'=>function_exists('env') ? env('payment_gateway_perfectMoney_accountId') : '',
             'passPhrase'=>function_exists('env') ? env('payment_gateway_perfectMoney_passPhrase') : ''
