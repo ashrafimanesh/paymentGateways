@@ -61,15 +61,17 @@ class Model extends PaymentGatewayModel
         $payResponse->setGatewayResponses($result);
         if($result && $result->status>0){
             $payResponse->setStatus(true)->setGatewayOrderId($result->refId);
-            $payResponse->setFormData(['action'=>$result->goto,'token'=>$result->refId,'callbackUrl'=>$payRequest->getCallbackUrl()]);
             if($this->accountType==self::DirectAccount){
                 $connector=ConnectorFactory::create(CurlConnector::class,$result->goto);
                 $result=json_decode($connector->run(null,[]));
                 $payResponse->setHtml($result->form);
+                $payResponse->setFormData(['action'=>$result->formInputs->action,'token'=>$result->formInputs->token,'callbackUrl'=>$result->formInputs->callbackUrl]);
+            }else{
+                $payResponse->setFormData(['action'=>$result->goto,'token'=>$result->refId,'callbackUrl'=>$payRequest->getCallbackUrl()]);
             }
         }
         else{
-            $payResponse->setStatus(false)->setMessage($result->errorMessage);
+            $payResponse->setStatus(false)->setMessage(isset($result->errorMessage) ? $result->errorMessage : null);
         }
         return $payResponse;
     }
