@@ -85,6 +85,7 @@ class Model extends PaymentGatewayModel
         $inputs=$callbackRequest->getGatewayResponses();
         if($inputs['status']>0 && isset($inputs['refId'])){
             $callbackResponse->setStatus(true)->setStatusCode(CallbackResponse::Success)->setGatewayOrderId($inputs['refId']);
+            $callbackResponse->setCardNumber(isset($inputs['cardNumber']) ? $inputs['cardNumber'] : null);
         }
         else{
             $callbackResponse->setStatus(false)->setMessage(isset($inputs['errorMessage']) ? $inputs['errorMessage'] : '');
