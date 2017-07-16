@@ -59,7 +59,7 @@ class Model extends PaymentGatewayModel
                 $payResponse->setHtml($this->createPayHtmlForm($token,$payRequest->getCallbackUrl()));
             }
             else{
-                $payResponse->setStatus(false)->setMessage($token);
+                $payResponse->setStatus(false)->setMessage('خطا در اتصال به بانک سامان');
             }
 
         }catch (\Exception $ex){
@@ -164,6 +164,12 @@ class Model extends PaymentGatewayModel
     }
 
 
+    /**
+     * @param $amount
+     * @param $orderId
+     * @return mixed|null
+     * @throws \Exception
+     */
     private function _token($amount,$orderId){
         $result=null;
         if(isset($amount) && isset($orderId)) {
